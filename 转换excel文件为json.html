@@ -1,0 +1,57 @@
+<html lang="en"> 
+
+<title> Convert Excel File To JSON </title>
+
+<head>
+ <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"> </script>
+ <script lang="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.1/xlsx.full.min.js"></script>
+ <script>
+  $(document).ready(function(){
+   $("#fileUploader").change(function(evt){
+     var selectedFile = evt.target.files[0];
+     var reader = new FileReader();
+     reader.onload = function(event) {
+      var data = event.target.result;
+      var workbook = XLSX.read(data, {
+       type: 'binary'
+      });
+      workbook.SheetNames.forEach(function(sheetName) {
+
+       var XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+       funDownload(XL_row_object,"resources.json")
+         console.log(XL_row_object)
+       if (XL_row_object.length > 0) {
+        document.getElementById("jsonObject").innerHTML = JSON.stringify(XL_row_object);
+       }
+       
+      })
+     };
+     reader.onerror = function(event) {
+     console.error("File could not be read! Code " + event.target.error.code);
+    };
+    // 读取上传文件为二进制
+    reader.readAsBinaryString(selectedFile);
+   });
+  });
+  funDownload = function (content, filename) {
+    // 创建隐藏的可下载链接
+    content = content[0] +"";
+    var eleLink = document.createElement('a');
+    eleLink.download = filename;
+    eleLink.style.display = 'none';
+    // 字符内容转变成blob地址
+    var blob = new Blob([content]);
+    eleLink.href = URL.createObjectURL(blob);
+    // 触发点击
+    document.body.appendChild(eleLink);
+    eleLink.click();
+    // 然后移除
+    document.body.removeChild(eleLink);
+};
+ </script>
+</head>
+<body>
+ <input type="file" id="fileUploader" name="fileUploader" accept=".xls, .xlsx"/>
+ </br></br>
+ JSON : <label id="jsonObject"> </label>
+</body>
